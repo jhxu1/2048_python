@@ -1,7 +1,10 @@
 import random
 from status import StatusCode
+import doctest
 
 class Screen:
+    """Screen
+    """
     def __init__(self, height=5, width=5, init_num=3, end_num=2048) -> None:
         self._height = height
         self._width = width
@@ -17,6 +20,10 @@ class Screen:
         for row_data in self._data:
             row_data = [str(d) for d in row_data]
             print(" ".join(row_data))
+
+    @property
+    def data(self):
+        return self._data
 
     def move(self, cmd):
         if cmd == 'w':
@@ -51,9 +58,18 @@ class Screen:
         return False
 
     def _move_up(self):
+        """
+        Test:
+            >>> tmp_screen = Screen(height=3, width=3)
+            >>> mock_data = [['X', 'X', 'X'], ['X', 'X', 'X'], [2, 2, 2]]
+            >>> tmp_screen._data = mock_data
+            >>> tmp_screen._move_up()
+            >>> tmp_screen._data
+            [[2, 2, 2], ['X', 'X', 'X'], ['X', 'X', 'X']]
+        """
         for col in range(self._width):
             num_row = 0
-            for row in range(self._height):
+            for row in range(num_row+1, self._height):
                 if self._data[row][col] == 'X':
                     continue
                 else:
@@ -65,8 +81,8 @@ class Screen:
                             self._data[num_row][col] *= 2
                             self._data[row][col] = 'X'
                         else:
-                            num_row += 1
-                            self._data[num_row][col], self._data[row][col] = self._data[row][col], 'X'
+                            pass
+                        num_row += 1
                         
     def _move_down(self):
         self._data = self._data[::-1]
@@ -76,7 +92,7 @@ class Screen:
     def _move_left(self):
         for row in range(self._height):
             num_col = 0
-            for col in range(self._width):
+            for col in range(num_col+1, self._width):
                 if self._data[row][col] == 'X':
                     continue
                 else:
@@ -88,8 +104,8 @@ class Screen:
                             self._data[row][num_col] *= 2
                             self._data[row][col] = 'X'
                         else:
-                            num_col += 1
-                            self._data[row][num_col], self._data[row][col] = self._data[row][col], 'X'
+                            pass
+                        num_col += 1
 
     def _move_right(self):
         self._data = [d[::-1] for d in self._data]
@@ -117,5 +133,4 @@ class Screen:
         return True
 
 if __name__ == '__main__':
-    test_screen = Screen()
-    test_screen.show()
+    doctest.testmod(verbose=True)
