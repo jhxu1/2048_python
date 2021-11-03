@@ -6,6 +6,10 @@ class Player(metaclass=abc.ABCMeta):
         self.id = id
         self._cur_game = None
 
+    @classmethod
+    def gen_by_player(cls, player):
+        return cls(player.name, player.id)
+
     @property
     def cur_game(self):
         return self._cur_game

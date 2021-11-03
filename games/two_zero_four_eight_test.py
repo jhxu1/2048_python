@@ -1,13 +1,29 @@
 import unittest
-import two_zero_four_eight
+from common.player import Player
+from games.two_zero_four_eight import TwoZeroFourEightPlayer, TwoZeroFourEightScreen, TwoZeroFourEightGame
+import os
+import json
 
 class TestScreen(unittest.TestCase):
     def __init__(self, methodName: str = ...) -> None:
         super().__init__(methodName=methodName)
-        self.config_path = 
+        config_path = os.path.join(os.getcwd(), "config/two_zero_four_eight.json")
+        self.config = json.load(open(config_path, "r"))
 
-    def test_init(self):
-        screen = Screen()
+    def test_init_screen(self):
+        screen = TwoZeroFourEightScreen(self.config)
+        screen.init()
+
+    def test_init_player(self):
+        player = Player(name="xiaoxu", id="0000")
+
+    def test_init_game(self):
+        game = TwoZeroFourEightGame(self.config)
+        player = Player(name="xiaoxu", id="000")
+        game.add_player(player)
+
+
+
 
     # def test_move_up(self):
     #     tmp_screen = Screen(height=3, width=3)

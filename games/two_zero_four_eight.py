@@ -1,21 +1,28 @@
 import random
 from common.status import StatusCode
 from common.player import Player
+from common.tools import _logger
 
 class TwoZeroFourEightGame:
     def __init__(self, config) -> None:
         self.config = config
-        self.status = StatusCode.RUNNING
-        self.screen = self.init_screen()
-        self._end_num = config["end_num"]
+        self.name = config['name']
+        self.status = StatusCode.UNACTIVATED
+        self.screen = None
+        self._end_num = config.get("end_num", 2048)
         self.players = {}
 
     def init_screen(self):
-        screen = TwoZeroFourEightScreen(self.config)
+        try:
+            screen = TwoZeroFourEightScreen(self.config)
+            screen.init()
+        except Exception as e:
+            _logger.error(f"Screen init failed with exception {e}")
+            raise e
         return screen
 
     def add_player(self, player):
-        self.players[player.id] = player
+        self.players[player.id] = TwoZeroFourEightPlayer.gen_by_player(player)
         player.cur_game = self
 
     def remove_player(self, player):
@@ -24,14 +31,19 @@ class TwoZeroFourEightGame:
         player.cur_game = None
         del self.players[player.id]
 
-    def check(self):
+    def start(self):
         if self.status == StatusCode.RUNNING:
-            pass
-        elif self.status == StatusCode.SUCCESS:
-            print("Success!")
-            exit()
-        else:
-            raise Exception("Get exception: {}".format(self.status))
+            _logger.warning("Game is already running")
+        self.screen = self.init_screen()
+        self.status = StatusCode.RUNNING
+        _logger.info(f"Start game {self.name}")
+
+    def restart(self):
+        self.status == StatusCode.UNACTIVATED
+        self.start()
+
+    def check(self):
+        assert self.status == StatusCode.RUNNING, f"Error status {self.status}"
 
     def _move_up(self):
         for col in range(self.screen._width):
@@ -86,16 +98,6 @@ class TwoZeroFourEightGame:
                     return True
         return False 
 
-    def _random_init(self, init_num):
-        for _ in range(init_num):
-            flag = self._random_gen_block()
-            if not flag:
-                return StatusCode.INIT_ERROR
-
-    def _random_gen_block(self):
-        if self.screen.blank_num == 0:
-            self.status = StatusCode.FAILED
-            return False
 
 class TwoZeroFourEightPlayer(Player):
     def __init__(self, *args) -> None:
@@ -122,16 +124,22 @@ class TwoZeroFourEightScreen:
         self._data = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._blank_num = self._height * self._width
         self.status = StatusCode.RUNNING
-        self._random_init(config["init_num"])
+        self.config = config
+
+    def init(self):
+        try:
+            self._random_init(self.config["init_num"])
+        except Exception as e:
+            raise e
 
     def show(self):
         """打印到屏幕上"""
         for row_data in self._data:
             row_data = ["x" for d in row_data if d is None]
             row_data = [str(d) for d in row_data]
-            print(" ".join(row_data))
+            _logger.info(" ".join(row_data))
 
-    def _gen_random_2(self):
+    def _gen_random_num_2(self):
         assert self.blank_num > 0
         all_num = self._width * self._height
         while True:
@@ -142,6 +150,17 @@ class TwoZeroFourEightScreen:
                 self.blank_num -= 1
                 break
         return True
+
+    def _random_init(self, init_num):
+        for _ in range(init_num):
+            try:
+                self._random_gen_block()
+            except Exception as e:
+                raise e
+
+    def _random_gen_block(self):
+        if self._blank_num == 0:
+            raise Exception("Screen if full!")
 
     @property
     def blank_num(self):

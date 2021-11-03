@@ -1,9 +1,9 @@
 from enum import Enum
+from logging import ERROR
 
 class StatusCode(Enum):
     SUCCESS = 1
-    INIT_ERROR = 2
-    COMMAND_ERROR = 3
-    FAILED = 4
-    RUNNING = 5
-
+    FAILED = 2
+    RUNNING = 3
+    ERROR = 4
+    UNACTIVATED = 5
